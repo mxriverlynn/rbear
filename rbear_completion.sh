@@ -1,6 +1,10 @@
 #/bin/zsh
 
 function __rbear_get_appraisal_names {
+  if [ ${COMP_CWORD} -ge 2 ]; then
+    return
+  fi
+
   # list all the gemfiles and 
   # reduce the full file path to just the file name without the extension
   local appraisal_file_list=$(find ./gemfiles -type f -name "*.gemfile" -print0 | xargs -0 -I % basename % .gemfile)
@@ -10,7 +14,7 @@ function __rbear_get_appraisal_names {
   # local appraisal_file_search="${COMP_WORDS[1]//[-]/_}"
 
   # run the list completion
-  COMPREPLY+=($(compgen -W "$appraisal_file_list" "$COMP_WORDS[1]"))
+  COMPREPLY=($(compgen -W "$appraisal_file_list" "$COMP_WORDS[1]"))
 }
 
   # local appraisal_list=$(cat Appraisals | grep appraise)
