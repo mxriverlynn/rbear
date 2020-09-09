@@ -1,4 +1,4 @@
-rbear: command line automation for `bundle exec rspec` with the Apprail gem
+rbear: command line automation for `bundle exec rspec` with the Appraisal gem
 
 # Basic Use
 
