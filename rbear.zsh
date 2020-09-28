@@ -1,9 +1,11 @@
-# load bash-complete
+# load shell completion
 source "$(dirname $0)/rbear_completion.sh"
 
 RBEAR_VERSION="0.1.0"
 
 function rbear {
+  __rbear_version
+
   while [ "$1" != "" ]; do
     case $1 in
       -a | --all )
@@ -19,7 +21,7 @@ function rbear {
         return 0
         ;;
       * )
-        __rbear_run_rspec_with_appraisal $@
+        __rbear_run_rspec_without_appraisal $@
         return $?
         ;;
     esac
@@ -27,12 +29,13 @@ function rbear {
 }
 
 function __rbear_version {
+  echo " "
   echo "rbear v$RBEAR_VERSION"
+  echo "------------"
 }
 
 function __rbear_help {
   __rbear_version
-  echo "---------------------"
   echo "A shell automation script for running 'bundle exec rspec' with appraisals"
   echo " "
   echo "Basic use:"
@@ -62,6 +65,7 @@ function __rbear_help {
 
 function __rbear_run_all {
   echo "Running rspec and all appraisals"
+  echo " "
   __rbear_run_rspec_without_appraisal $@
   __rbear_run_rspec_with_appraisal $@
 }
