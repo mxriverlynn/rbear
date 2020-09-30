@@ -21,7 +21,7 @@ function rbear {
         return 0
         ;;
       * )
-        __rbear_run_rspec_without_appraisal $@
+        __rbear_run $@
         return $?
         ;;
     esac
@@ -38,19 +38,27 @@ function __rbear_help {
   __rbear_version
   echo "A shell automation script for running 'bundle exec rspec' with appraisals"
   echo " "
-  echo "Basic use:"
+  echo "Basic use"
+  echo "---------"
   echo " "
-  echo "  rbear [[option] | [appraisal name]] [spec file(s)]"
+  echo "run rbear with a command line option"
+  echo "  rbear [option]"
+  echo " "
+  echo "run 'bundle exec appraisal <appraisal name>' with spec files if provided"
+  echo "  rbear <appraisal name> [spec file(s)]"
+  echo " "
+  echo "run 'bundle exec <command>' with any abitrary command and options"
+  echo "  rbear <command> [option(s)]"
   echo " "
   echo "Command line options:"
   echo " "
-  echo "  -a  --all        # run rspec, plus all of the appraisals"
-  echo "  -h  --help       # this help screen"
-  echo "  -v  --version    # show the current rbear version"
+  echo "  -a  --all     [spec file(s)] # run rspec, plus all named appraisals"
+  echo "  -h  --help                   # this help screen"
+  echo "  -v  --version                # show the current rbear version"
   echo " "
   echo "Examples:"
   echo " "
-  echo "  1. run rspec on a file with all appraisals:"
+  echo "  1. run rspec on a file with no appraisals:"
   echo " "
   echo "     rbear spec/foo/bar_spec.rb"
   echo " "
@@ -61,6 +69,10 @@ function __rbear_help {
   echo "  3. run rspec on a file without any appraisals, and then with all appraisals:"
   echo " "
   echo "     rbear --all spec/foo/bar_spec.rb"
+  echo " "
+  echo "  4. run a command such as sorbet's srb with options"
+  echo " "
+  echo "     rbear srb -tc"
 }
 
 function __rbear_run_all {
@@ -70,26 +82,43 @@ function __rbear_run_all {
   __rbear_run_rspec_with_appraisal $@
 }
 
+function __rbear_run_rspec_with_appraisal {
+  local appraisal_name=$1
+  local appraisal_file=${appraisal_name//[-]/_}
+  local opts=()
+
+  echo "Running rspec with named appraisal: $appraisal_name"
+  echo " "
+
+  opts=( $appraisal_name rspec ${@:2} )
+  bundle exec appraisal $opts
+}
+
 function __rbear_run_rspec_without_appraisal {
+  echo "Running rspec without appraisals"
+  echo " "
+
   bundle exec rspec $@
 }
 
-function __rbear_run_rspec_with_appraisal {
-  local appraisal_name=$1
+function __rbear_run_exec {
+  echo "Running $1"
+  echo " "
+
+  bundle exec $@
+}
+
+function __rbear_run {
+  local first_option=$1
   local appraisal_file=${1//[-]/_}
-  local opts=()
 
   if [ -f "gemfiles/$appraisal_file.gemfile" ]; then
-    echo "Running rspec with named appraisal: $appraisal_name"
-    echo " "
-    opts=( $appraisal_name rspec ${@:2} )
-  else
-    echo "Running rspec with all appraisals"
-    echo " "
-    opts=( rspec $@ )
+    __rbear_run_rspec_with_appraisal $@
+  elif $(which $first_option); then
+    __rbear_run_exec $@
+  else 
+    __rbear_run_rspec_without_appraisal $@
   fi
-
-  bundle exec appraisal $opts
 }
 
 alias rbe="bundle exec"
