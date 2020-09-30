@@ -114,14 +114,11 @@ function __rbear_run {
 
   if [ -f "gemfiles/$appraisal_file.gemfile" ]; then
     __rbear_run_rspec_with_appraisal $@
-  elif $(which $first_option); then
+  elif which $first_option > /dev/null 2>&1; then
     __rbear_run_exec $@
   else 
     __rbear_run_rspec_without_appraisal $@
   fi
 }
 
-alias rbe="bundle exec"
-alias rbea="rbe appraisal"
-alias rber="rbe rspec"
 alias acab="rbe rubocop"
